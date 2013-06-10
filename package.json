@@ -1,0 +1,26 @@
+{
+  "name": "dustmap-server",
+  "version": "0.0.0",
+  "description": "dustmap backend server",
+  "main": "index.js",
+  "scripts": {
+    "test": "cd test && nodeunit index.js"
+  },
+  "repository": "",
+  "keywords": [
+    "dustmap",
+    "server",
+    "backend"
+  ],
+  "author": "Hannes Hörl <hannes.hoerl@snowreporter.com>",
+  "license": "BSD",
+  "dependencies" : {
+    "dustmap-payload" : "git://github.com/dustmap/dustmap-payload.git",
+    "express" : "*" ,
+    "express-rate" : "*"
+  },
+  "devDependencies" : {
+    "nodeunit" : "*" ,
+    "supertest" : "*"
+  }
+}
