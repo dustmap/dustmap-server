@@ -1,0 +1,30 @@
+{
+    "dev" : {
+        "user" : "my username" ,
+        "password" : "my password" ,
+        "host" : "the db host" ,
+        "port" : 5432 ,
+        "database" : "the database" ,
+        "driver"  : "postgres" ,
+        "protocol" : "postgres" ,
+        "query" : {
+            "ssl" : true ,
+            "debug" : true
+        }
+    }
+
+  , "other environment" : {
+        "user" : "my username" ,
+        "password" : "my password" ,
+        "host" : "the db host" ,
+        "port" : 5432 ,
+        "database" : "the database" ,
+        "driver"  : "postgres -- this is needed by db-migration" ,
+        "protocol" : "postgres -- this is needed by node-orm2" ,
+        "query" : {
+            "ssl" : true ,
+            "debug" : true
+        }
+
+    }
+}

@@ -4,7 +4,8 @@
   "description": "dustmap backend server",
   "main": "index.js",
   "scripts": {
-    "test": "cd test && nodeunit index.js"
+    "test": "cd test && nodeunit index.js",
+    "start": "node ."
   },
   "repository": "",
   "keywords": [
@@ -14,13 +15,21 @@
   ],
   "author": "Hannes Hörl <hannes.hoerl@snowreporter.com>",
   "license": "BSD",
-  "dependencies" : {
-    "dustmap-payload" : "git://github.com/dustmap/dustmap-payload.git",
-    "express" : "*" ,
-    "express-rate" : "*"
+  "dependencies": {
+    "express": "~3.2.6",
+    "express-rate": "0.0.1",
+    "here": "0.0.2",
+    "orm": "git://github.com/dresende/node-orm2",
+    "pg": "~2.0.0",
+    "pg-hstore": "~1.0.3",
+    "orm-transaction": "0.0.1",
+    "async": "~0.2.9",
+    "dustmap-payload": "git://github.com/dustmap/dustmap-payload",
+    "db-migrate": "~0.5.1"
   },
-  "devDependencies" : {
-    "nodeunit" : "*" ,
-    "supertest" : "*"
+  "devDependencies": {
+    "supertest": "~0.7.0",
+    "nodeunit": "~0.8.0",
+    "supervisor": "~0.5.3"
   }
 }

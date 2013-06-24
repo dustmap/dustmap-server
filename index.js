@@ -2,9 +2,9 @@ var express = require('express')
   , app = express()
   , rate = require('express-rate')
   , routes = require('./routes')
+  , orm = require('./models')
 ;
 module.exports = app;
-
 
 
 app.configure('production', function(){
@@ -19,16 +19,20 @@ app.configure(function(){
         interval : 1
       , limit : 10
     }));
+    app.use(express.favicon());
     app.use(express.bodyParser());
 });
 
+orm(function(err, db){
+    if (err)
+        throw err;
 
-routes(app);
+    routes(app, db);
 
-
-if (!module.parent) {
-    var port = process.env.PORT || 3000;
-    app.listen(port, function(){
-         console.log('listening on port', port);
-    });
-}
+    if (!module.parent) {
+        var port = process.env.PORT || 3000;
+        app.listen(port, function(){
+            console.log('listening on port', port);
+        });
+    }
+}) 
