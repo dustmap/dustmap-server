@@ -1,8 +1,8 @@
 var express = require('express')
   , app = express()
-  , rate = require('express-rate')
   , routes = require('./routes')
-  , orm = require('./models')
+  , ormloader = require('./models')
+  , ratelimit = require('./lib/ratelimit.js')
 ;
 module.exports = app;
 
@@ -15,24 +15,16 @@ app.configure('development', function(){
 });
 app.configure(function(){
     app.use(express.limit('2mb'));
-    app.all('*', rate.middleware({
-        interval : 1
-      , limit : 10
-    }));
+    app.use(ratelimit());
     app.use(express.favicon());
-    app.use(express.bodyParser());
+    app.use(ormloader());
 });
 
-orm(function(err, db){
-    if (err)
-        throw err;
+routes(app);
 
-    routes(app, db);
-
-    if (!module.parent) {
-        var port = process.env.PORT || 3000;
-        app.listen(port, function(){
-            console.log('listening on port', port);
-        });
-    }
-}) 
+if (!module.parent) {
+    var port = process.env.PORT || 3000;
+    app.listen(port, function(){
+        console.log('listening on port', port);
+    });
+}

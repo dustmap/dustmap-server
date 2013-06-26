@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "cd test && nodeunit index.js",
-    "start": "node ."
+    "start": "NODE_PG_FORCE_NATIVE=1 node ."
   },
   "repository": "",
   "keywords": [
@@ -17,15 +17,15 @@
   "license": "BSD",
   "dependencies": {
     "express": "~3.2.6",
-    "express-rate": "0.0.1",
     "here": "0.0.2",
     "orm": "git://github.com/dresende/node-orm2",
-    "pg": "~2.0.0",
+    "pg": "git://github.com/hoegaarden/node-postgres",
     "pg-hstore": "~1.0.3",
     "orm-transaction": "0.0.1",
     "async": "~0.2.9",
     "dustmap-payload": "git://github.com/dustmap/dustmap-payload",
-    "db-migrate": "~0.5.1"
+    "db-migrate": "~0.5.1",
+    "connect-ratelimit": "0.0.5"
   },
   "devDependencies": {
     "supertest": "~0.7.0",

@@ -1,46 +1,43 @@
 var orm = require('orm')
-  , coninfo = require('../database.json')[ process.env.NODE_ENV || 'dev' ]
   , transaction = require("orm-transaction")
+  , async = require('async')
 ;
 
-/*
- *  we need to load the models in the right order to make sure, we can setup
- *  relations (hasOne, ...) between them
- */
-var files = [
-    'Node'
-  , 'Upload'
-  , 'Measurement'
-  , 'NodeUpload'
-];
-
-module.exports = function(cb, con) {
-    con = con || coninfo;
-
-    return orm.connect(con, function(err, db){
+var default_con = require('../database.json')[ process.env.NODE_ENV || 'dev' ];
+var default_opts = {
+    define: function(db, models){
         db.use(transaction);
         db.settings.set('properties.association_key', '{name}');
         db.settings.set('instance.cache', false);
 
-        var loaded = 0;
-        var errors = [];
+        /*
+         *  we need to load the models in the right order to make sure, we can setup
+         *  relations (hasOne, ...) between them
+         */
+        var files = [
+            'Node'
+          , 'Upload'
+          , 'Measurement'
+          , 'NodeUpload'
+        ];
 
-        files.forEach(function(file) {
-            db.load(file, function(err) {
-                loaded++;
+        async.eachSeries(
+            files
+          , function(file, cb){
+                db.load(file, cb);
+            }
+          , function(err) {
+                if (err)
+                    throw err;
 
-                if (err) {
-                    console.error('Error loading model', file, err);
-                    errors.push(err);
-                }
+                Object.keys(db.models).forEach(function(name){
+                    models[name] = db.models[name];
+                });
+            }
+        );
+    }
+};
 
-                if (loaded === files.length) {
-                    cb( errors.length ? errors : null, db );
-                }
-            });
-        });
-    });
-}
-
-// db.settings.set("properties.primary_key", "id");
-// require('./validator').attach(db);
+module.exports = function(con, opts) {
+    return orm.express( con || default_con , opts || default_opts );
+};

@@ -8,10 +8,9 @@ var addLinks = function(where, req, others) {
     where['_links'].self = { href: req.url };
 }
 
-module.exports = function(app, orm) {
-    var models = orm.models;
+module.exports = function(app) {
 
-    app.post('/upload', function(req, res, next){
+    app.post('/upload', function(req, res){
         var payload = new Payload();
 
         payload.on('parsed', function(doc){
@@ -28,7 +27,7 @@ module.exports = function(app, orm) {
                     var measurements = doc[node_name][time];
 
                     measurements.forEach(function(data){
-                        var obj = new models.NodeUpload({
+                        var obj = new req.models.NodeUpload({
                             data : data
                           , ts : new Date( time * 1000 )
                           , node_name : node_name
@@ -39,7 +38,7 @@ module.exports = function(app, orm) {
             }
 
             // all or nothing -> run in transaction
-            return orm.transaction(function(err, t){
+            return req.db.transaction(function(err, t){
                 if (err) {
                     console.error('Error starting transaction', err);
                     return res.send(500);
@@ -82,7 +81,7 @@ module.exports = function(app, orm) {
 
     
     app.get('/nodes', function(req, res){
-        models.Node.find().only('name', 'id').run(function(err, nodes){
+        req.models.Node.find().only('name', 'id').run(function(err, nodes){
             if (err)
                 return res.send(400, err);
 
@@ -105,7 +104,7 @@ module.exports = function(app, orm) {
     });
 
     app.get('/nodes/:node_id', function(req, res){
-        models.Node.get(req.params.node_id, function(err, node){
+        req.models.Node.get(req.params.node_id, function(err, node){
             if (err)
                 return res.send(400, err);
 
@@ -118,7 +117,7 @@ module.exports = function(app, orm) {
     });
 
     app.get('/nodes/:node_id/uploads', function(req, res){
-        models.Upload.find({node:req.params.node_id}).only('ts', 'id').run(function(err, uploads){
+        req.models.Upload.find({node:req.params.node_id}).only('ts', 'id').run(function(err, uploads){
             if (err)
                 return res.send(400, err);
 
@@ -141,7 +140,7 @@ module.exports = function(app, orm) {
     });
     
     app.get('/uploads/:upload_id', function(req, res){
-        models.Measurement.find({upload:req.params.upload_id}).only('id', 'data').run(function(err, measurements){
+        req.models.Measurement.find({upload:req.params.upload_id}).only('id', 'data').run(function(err, measurements){
             if (err)
                 return res.send(400, err);
 
@@ -164,13 +163,10 @@ module.exports = function(app, orm) {
     });
 
     app.get('/measurements/:m_id', function(req, res){
-        models.Measurement.get(req.params.m_id, function(err, measurement){
+        req.models.Measurement.get(req.params.m_id, function(err, measurement){
             if (err)
                 return res.send(400, err);
 
-            measurement.hasUpload(function(){
-                console.log( arguments );
-            });
             addLinks(measurement, req);
 
             res.send(measurement);
@@ -178,3 +174,4 @@ module.exports = function(app, orm) {
     });
 
 };
+ 
