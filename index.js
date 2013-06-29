@@ -1,30 +1,31 @@
-var express = require('express')
-  , app = express()
-  , routes = require('./routes')
-  , ormloader = require('./models')
-  , ratelimit = require('./lib/ratelimit.js')
+var app = require('./lib/express')
+  , http = require('http')
+  , https = require('https')
+  , fs = require('fs')
+  , http_port = process.env.PORT_HTTP || process.env.PORT || 8080
+  , https_port = process.env.PORT_HTTPS || 4430
 ;
-module.exports = app;
 
+var https_opts = {
+    key:  fs.readFileSync('./certs/server.key')
+  , cert: fs.readFileSync('./certs/server.crt')
+}
 
-app.configure('production', function(){
-    app.use(express.logger());
-});
-app.configure('development', function(){
-    app.use(express.logger('dev'));
-});
-app.configure(function(){
-    app.use(express.limit('2mb'));
-    app.use(ratelimit());
-    app.use(express.favicon());
-    app.use(ormloader());
-});
+function listening() {
+    var addr = this.address();
+    var type = this.hasOwnProperty('key') ? 'https' : 'http';
+    console.log('* listening on %s://%s:%d', type, addr.address, addr.port);
+}
 
-routes(app);
+var http = http.createServer(app)
+    .listen(http_port, listening)
+;
 
-if (!module.parent) {
-    var port = process.env.PORT || 3000;
-    app.listen(port, function(){
-        console.log('listening on port', port);
-    });
+var https = https.createServer(https_opts, app)
+    .listen(https_port, listening)
+;
+
+module.exports = {
+    http: http
+  , https : https
 }
