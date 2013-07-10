@@ -9,7 +9,7 @@ var app = require('./lib/express')
 var https_opts = {
     key:  fs.readFileSync('./certs/server.key')
   , cert: fs.readFileSync('./certs/server.crt')
-}
+};
 
 function listening() {
     var addr = this.address();
@@ -28,4 +28,4 @@ var https = https.createServer(https_opts, app)
 module.exports = {
     http: http
   , https : https
-}
+};

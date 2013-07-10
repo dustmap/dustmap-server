@@ -4,8 +4,9 @@
   "description": "dustmap backend server",
   "main": "index.js",
   "scripts": {
-    "test": "cd test && nodeunit index.js",
-    "start": "NODE_PG_FORCE_NATIVE=1 node ."
+    "start": "NODE_PG_FORCE_NATIVE=1 node .",
+    "test": "export NODE_PG_FORCE_NATIVE=1 ; cd test && nodeunit index.js",
+    "pretest": "find . -path ./node_modules -prune -o -name \\*js -print0 | xargs -0 node_modules/.bin/jshint"
   },
   "repository": "",
   "keywords": [
@@ -19,7 +20,7 @@
     "express": "~3.2.6",
     "here": "0.0.2",
     "orm": "git://github.com/dresende/node-orm2",
-    "pg": "git://github.com/hoegaarden/node-postgres",
+    "pg": "~2.0.0",
     "pg-hstore": "~1.0.3",
     "orm-transaction": "0.0.1",
     "async": "~0.2.9",

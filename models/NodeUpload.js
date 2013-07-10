@@ -1,14 +1,4 @@
-var hstore = require('pg-hstore');
-
-var hstore2json = function() {
-    if (typeof this.data === 'string')
-        this.data = hstore.parse(this.data);
-}
-
-var json2hstore = function(next) {
-    this.data = hstore.stringify(this.data);
-    return next();
-}
+var hooks = require('./hooks.js');
 
 module.exports = function(db, cb){
     var NodeUpload = db.define('NodeUpload', {
@@ -19,11 +9,11 @@ module.exports = function(db, cb){
         table : 'node_uploads'
       , id : 'node_id'
       , hooks : {
-            afterLoad: hstore2json ,
-            beforeSave: json2hstore ,
-            afterSave: hstore2json
+            afterLoad:  hooks.hstore2json('data') ,
+            beforeSave: hooks.json2hstore('data') ,
+            afterSave:  hooks.hstore2json('data')
         }
     });
 
     return cb();
-}
+};

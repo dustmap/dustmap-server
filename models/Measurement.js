@@ -1,14 +1,4 @@
-var hstore = require('pg-hstore');
-
-function hstore2json() {
-    if (typeof this.data === 'string')
-        this.data = hstore.parse(this.data);
-}
-
-function json2hstore(next) {
-    this.data = hstore.stringify(this.data);
-    next();
-}
+var hooks = require('./hooks.js');
 
 module.exports = function(db, cb){
     var Measurement = db.define('Measurement', {
@@ -16,16 +6,16 @@ module.exports = function(db, cb){
     },{
         table : 'measurements'
       , hooks : {
-            afterLoad: hstore2json ,
-            beforeSave: json2hstore ,
-            afterSave: hstore2json
+            afterLoad:  hooks.hstore2json('data') ,
+            beforeSave: hooks.json2hstore('data') ,
+            afterSave:  hooks.hstore2json('data')
         }
     });
 
     Measurement.hasOne('upload', db.models.Upload, {
         required : true
       , reverse  : 'measurement'
-    })
+    });
 
     return cb();
-}
+};

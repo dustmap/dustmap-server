@@ -1,12 +1,8 @@
 var Payload = require('dustmap-payload')
   , async = require('async')
   , util = require('util')
+  , HAL = require('../lib/hal.js')
 ;
-
-var addLinks = function(where, req, others) {
-    where['_links'] = others || {};
-    where['_links'].self = { href: req.url };
-}
 
 module.exports = function(app) {
 
@@ -18,22 +14,23 @@ module.exports = function(app) {
             var node_name;
             var models_to_save = [];
 
+            function addMeasurement(data) {
+                var obj = new req.models.NodeUpload({
+                    data : data
+                  , ts : new Date( time * 1000 )
+                  , node_name : node_name
+                });
+                models_to_save.push(obj);                
+            }
+
             // TODO: move this to dustmap-payload
-            while (node_name = node_names.pop()) {
+            while ( (node_name = node_names.pop()) ) {
                 var times = Object.keys( doc[node_name] );
                 var time;
 
-                while (time = times.pop()) {
+                while ( (time = times.pop()) ) {
                     var measurements = doc[node_name][time];
-
-                    measurements.forEach(function(data){
-                        var obj = new req.models.NodeUpload({
-                            data : data
-                          , ts : new Date( time * 1000 )
-                          , node_name : node_name
-                        });
-                        models_to_save.push(obj);
-                    });
+                    measurements.forEach(addMeasurement);
                 }
             }
 
@@ -66,6 +63,8 @@ module.exports = function(app) {
                             console.error('Error on commit', err);
                             return res.send(500);
                         }
+                        
+                        // TODO: respond with HAL links to new uploads ...
                         return res.send(201);
                     });
                 });
@@ -79,38 +78,77 @@ module.exports = function(app) {
         req.pipe(payload);
     });
 
-    
     app.get('/nodes', function(req, res){
-        req.models.Node.find().only('name', 'id').run(function(err, nodes){
+        var query = req.models.Node.find()
+            .offset(req.page.offset)
+            .limit(req.page.limit)
+        ;
+
+        query.run(function(err, nodes){
             if (err)
                 return res.send(400, err);
 
-            var doc = {
-                count : nodes.length
-            };
+            async.map(nodes, function iterator(node, cb){
+                var q_upload = req.models.Upload
+                    .find( { node : node.id } )
+                    .order('ts', 'Z')
+                    .limit(1)
+                    .only('id', 'ts')
+                ;
 
-            var node_links = nodes.map(function(node){
-                return {
-                    href : util.format('/node/%d', node.id)
-                  , title : node.name
-                }
-            });
-            addLinks(doc, req, {
-                node : node_links
-            });
+                HAL.link(node, 'self', '/nodes/'.concat(node.id));
 
-            res.send(doc);
+                // TODO: make this simpler with extra view / function in postgres
+                return q_upload.run(function(err, uploads){
+                    if (err)
+                        return res.send(err);
+
+                    if (uploads.length) {
+                        var upload = uploads[0]
+                          , ts = upload.ts
+                        ;
+
+                        var q_measurement = req.models.Measurement
+                            .find( { upload : upload.id } )
+                            .only('data', 'id')
+                        ;
+                        return q_measurement.run(function(err, measurements){
+                            if (err)
+                                return cb(err);
+
+                            var last_upload = {};
+                            last_upload.ts = ts;
+                            last_upload.measurements = measurements.map(function(measurement){
+                                return measurement.data;
+                            });
+
+                            HAL.link(last_upload, 'self', '/uploads/'.concat(upload.id));
+
+                            HAL.embed(node, 'last_upload', last_upload);
+
+                            return cb(null, node);
+                        });
+                    } else {
+                        return cb(null, node);
+                    }
+                });
+            }, function done(err, doc){
+                if (err)
+                    return res.send(400, err);
+                return res.send(doc);
+            });
         });
     });
 
+    /*
     app.get('/nodes/:node_id', function(req, res){
         req.models.Node.get(req.params.node_id, function(err, node){
             if (err)
-                return res.send(400, err);
+                return res.send(404, err);
 
-            addLinks(node, req, {
-                'uploads' : { href : util.format('/node/%d/uploads', node.id) }
-            })
+            HAL.links(node, req, {
+                'uploads' : { href : util.format('/nodes/%d/uploads', node.id) }
+            });
 
             res.send(node);
         });
@@ -119,7 +157,7 @@ module.exports = function(app) {
     app.get('/nodes/:node_id/uploads', function(req, res){
         req.models.Upload.find({node:req.params.node_id}).only('ts', 'id').run(function(err, uploads){
             if (err)
-                return res.send(400, err);
+                return res.send(404, err);
 
             var doc = {
                 count : uploads.length
@@ -129,9 +167,9 @@ module.exports = function(app) {
                 return {
                     href : util.format('/uploads/%d', upload.id)
                   , title : upload.ts.toISOString()
-                }
+                };
             });
-            addLinks(doc, req, {
+            HAL.links(doc, req, {
                 upload : upload_links
             });
 
@@ -142,7 +180,7 @@ module.exports = function(app) {
     app.get('/uploads/:upload_id', function(req, res){
         req.models.Measurement.find({upload:req.params.upload_id}).only('id', 'data').run(function(err, measurements){
             if (err)
-                return res.send(400, err);
+                return res.send(404, err);
 
             var doc = {
                 count : measurements.length
@@ -152,9 +190,9 @@ module.exports = function(app) {
                 return {
                     href : util.format('/measurements/%d', m.id)
                   , title : m.data.type
-                }
+                };
             });
-            addLinks(doc, req, {
+            HAL.links(doc, req, {
                 measurement : measurement_links
             });
 
@@ -165,13 +203,13 @@ module.exports = function(app) {
     app.get('/measurements/:m_id', function(req, res){
         req.models.Measurement.get(req.params.m_id, function(err, measurement){
             if (err)
-                return res.send(400, err);
+                return res.send(404, err);
 
-            addLinks(measurement, req);
+            HAL.links(measurement, req);
 
             res.send(measurement);
         });
     });
-
+    */
 };
  

@@ -110,4 +110,4 @@ exports.down = function(db, cb) {
       , db.dropTable.bind(db, 'uploads')
       , db.dropTable.bind(db, 'nodes')
     ], cb);
-}
+};

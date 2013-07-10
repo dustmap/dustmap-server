@@ -4,6 +4,7 @@ var orm = require('orm')
 ;
 
 var default_con = require('../database.json')[ process.env.NODE_ENV || 'dev' ];
+
 var default_opts = {
     define: function(db, models){
         db.use(transaction);
