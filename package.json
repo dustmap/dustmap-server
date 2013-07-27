@@ -37,6 +37,7 @@
   "devDependencies": {
     "supertest": "~0.7.0",
     "nodeunit": "~0.8.0",
-    "supervisor": "~0.5.3"
+    "supervisor": "~0.5.3",
+    "jshint": "*"
   }
 }
