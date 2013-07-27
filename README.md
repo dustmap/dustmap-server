@@ -24,14 +24,16 @@ If you are interested in any of the stuff we (try to) do, feel free to drop us a
 
 Hints
 -
- - Tests are currently not working, should come back soon
  - You need to setup the connection to your database in `database.json` in the root of the project
  - You can setup multiple different database connections for different `NODE_ENV`, check out the `database.json.example`
  - We currently use `hstore`. Perhaps this will change in future (we'll perhaps use `JSON` as a datatype as soon as soon as 9.3 is out ... or not)
- - Currently only the upload works ... more coming
  - No Auth/Sign/.../Whatsoever ... coming in future
- - If you need SSL to connect to the database, it seems you need to manually edit the require stanzas for both `node-orm2` and `db-migrate` and thus use the `libpg` bindings
-   - `... libpg('pg') ...` -> `require('pg').native ...`
+ - If you need SSL to connect to the database you need to set the environment variable `NODE_PG_FORCE_NATIVE` (this is the defaul for `npm run` and `npm start`)
+ - you can change the port(s) the server is listening on with `npm config set dustmap-server:http_port 1234`. Available config options:
+   - `http_port`
+   - `https_port`
+   - `https_key`
+   - `https_cert`
 
 More or less relevant links
 -
@@ -44,9 +46,9 @@ TODO
  - [x] ORM, DB, ...
  - [x] Ratelimit, Upload Limit
  - [ ] Validation in application
- - [ ] JSON HAL enhancments
+ - [x] JSON HAL enhancments
  - [ ] Caching DB requests, E-Tags, ...
- - [ ] perhaps patch `pg` to switch between natvie and js mode via environment variable (nedd to look into this ...)
+ - [x] perhaps patch `pg` to switch between natvie and js mode via environment variable (nedd to look into this ...)
  - [ ] update / delete resources (?)
  - [ ] user / node management
  - [ ] static stuff for single site application (?)

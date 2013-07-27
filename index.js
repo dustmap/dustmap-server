@@ -6,26 +6,32 @@ var app = require('./lib/express')
   , https_port = process.env.PORT_HTTPS || 4430
 ;
 
-var https_opts = {
-    key:  fs.readFileSync('./certs/server.key')
-  , cert: fs.readFileSync('./certs/server.crt')
-};
-
 function listening() {
     var addr = this.address();
     var type = this.hasOwnProperty('key') ? 'https' : 'http';
     console.log('* listening on %s://%s:%d', type, addr.address, addr.port);
 }
 
-var http = http.createServer(app)
-    .listen(http_port, listening)
-;
+function startHttp() {
+    var port = process.env.npm_package_config_http_port;
+    if (port) {
+        var srv = http.createServer(app).listen(port, listening);
+        module.exports.http = srv;
+    }
+}
 
-var https = https.createServer(https_opts, app)
-    .listen(https_port, listening)
-;
+function startHttps() {
+    var port = process.env.npm_package_config_https_port;
+    if (port) {
+        var opts = {
+            key:  fs.readFileSync(process.env.npm_package_config_https_key)
+          , cert: fs.readFileSync(process.env.npm_package_config_https_cert)
+        };
+        var srv = https.createServer(opts, app).listen(port, listening);
+        module.exports.https = srv;
+    }
+}
 
-module.exports = {
-    http: http
-  , https : https
-};
+startHttp();
+startHttps();
+

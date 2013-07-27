@@ -30,15 +30,10 @@ module.exports = {
             testnode : {
                 1234567890 : [
                     { type: 'temperature' , value: 10  } ,
-                    { type : 'temperature' , value : 0x01 , id : 'somwthing else "$$$"' }
-                ]
-            } ,
-            "test node 2" : {
-                1234567890 : [
-                    { type : 'temperature' , value : 25.5 } ,
-                    { type : 'temperature' , value : 20.1 , id : 'indoor' } ,
-                    { type : 'humidity' , value : 50 } ,
-                    { type : 'particle_concentration' , value : 2000 }
+                    { type: 'temperature' , value: 0x01 , id: 'something else' }
+                ] ,
+                1231231230 : [
+                    { type: 'humidity', value: 100 }
                 ]
             }
         };
@@ -47,8 +42,24 @@ module.exports = {
             .post('/upload')
             .send(doc)
             .expect(201)
-            .end(test.done)
+            .end(function(err, res){
+                var url = JSON.parse(res.text)._links.node.href;
+
+                request.get(url).end(function(err, res){
+                    var uploads = JSON.parse(res.text)._embedded.upload.length ;
+                    test.equal(uploads, 2);
+                    test.done();
+                });
+            })
         ;
+    }
+  
+  , 'should have ratelimit headers' : function(test) {
+        test.expect(1);
+        request.get('/').end(function(err, res){
+            test.ok( res.headers.hasOwnProperty('x-ratelimit-remaining') );
+            test.done();
+        });
     }
 
   , 'exit' : function(test){

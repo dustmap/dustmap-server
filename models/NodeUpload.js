@@ -7,7 +7,7 @@ module.exports = function(db, cb){
       , data : { type: 'binary', required: true }
     },{
         table : 'node_uploads'
-      , id : 'node_id'
+      , id : [ 'node_id' , 'upload' ]
       , hooks : {
             afterLoad:  hooks.hstore2json('data') ,
             beforeSave: hooks.json2hstore('data') ,

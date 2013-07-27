@@ -5,9 +5,15 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_PG_FORCE_NATIVE=1 node .",
-    "test": "export NODE_PG_FORCE_NATIVE=1 ; cd test && nodeunit index.js",
+    "test": "./test/run.sh",
     "pretest": "find . -path ./node_modules -prune -o -name \\*js -print0 | xargs -0 node_modules/.bin/jshint"
   },
+  "config" : {
+    "http_port" : 8080 ,
+    "https_port" : 4430 ,
+    "https_cert" : "./certs/server.crt" ,
+    "https_key" : "./certs/server.key"
+  } ,
   "repository": "",
   "keywords": [
     "dustmap",
@@ -19,14 +25,14 @@
   "dependencies": {
     "express": "~3.2.6",
     "here": "0.0.2",
-    "orm": "git://github.com/dresende/node-orm2",
+    "orm": "git://github.com/dresende/node-orm2#master",
     "pg": "~2.0.0",
     "pg-hstore": "~1.0.3",
-    "orm-transaction": "0.0.1",
+    "orm-transaction": "git://github.com/dresende/node-orm-transaction",
     "async": "~0.2.9",
-    "dustmap-payload": "git://github.com/dustmap/dustmap-payload",
     "db-migrate": "~0.5.1",
-    "connect-ratelimit": "0.0.5"
+    "connect-ratelimit": "0.0.5",
+    "dustmap-payload": "git://github.com/dustmap/dustmap-payload"
   },
   "devDependencies": {
     "supertest": "~0.7.0",

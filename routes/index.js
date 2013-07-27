@@ -42,7 +42,7 @@ module.exports = function(app) {
                 }
 
                 async.each(models_to_save, function(obj, cb){
-                    return obj.save(function(err){
+                    return obj.save(function(err, data){
                         return cb( err ? err : null );
                     });
                 }, function(err){
@@ -64,8 +64,25 @@ module.exports = function(app) {
                             return res.send(500);
                         }
                         
-                        // TODO: respond with HAL links to new uploads ...
-                        return res.send(201);
+                        var body = {};
+                        var uploads = {};
+                        var nodes = {};
+                        models_to_save.forEach(function(instance){
+                            var upload = instance.upload;
+                            var node = instance.node_id;
+
+                            if (! nodes.hasOwnProperty(node)) {
+                                nodes[node] = true;
+                                HAL.link(body, 'node', '/nodes/'.concat(node));
+                            }
+
+                            if (! uploads.hasOwnProperty(upload)) {
+                                uploads[upload] = true;
+                                HAL.link(body, 'upload', '/uploads/'.concat(upload));
+                            }
+                        });
+
+                        return res.send(201, body);
                     });
                 });
             });
@@ -136,6 +153,51 @@ module.exports = function(app) {
                 if (err)
                     return res.send(400, err);
                 return res.send(doc);
+            });
+        });
+    });
+
+    app.get('/nodes/:node_id', function(req, res){
+        req.models.Node.get(req.params.node_id, function(err, node){
+            if (err)
+                return res.send(400, err);
+
+            HAL.link(node, 'self', '/nodes/'.concat(node.id));
+
+            var q_upload = req.models.Upload
+                .find({'node':node.id})
+                .order('ts', 'Z')
+                .limit(req.page.limit)
+                .offset(req.page.offset)
+            ;
+            
+            q_upload.run(function(err, uploads){
+                if (err)
+                    return res.send(400, err);
+
+                var handleUpload = function(upload, cb) {
+                    HAL.link(upload, 'self', '/uploads/'.concat(upload.id));
+                    HAL.embed(node, 'upload', upload);
+
+                    req.models.Measurement.find({'upload':upload.id})
+                        .run(function(err, ms){
+                            if (err)
+                                cb(err);
+
+                            ms.forEach(function(m){
+                                HAL.link(m, 'self', '/measurements/'.concat(m.id));
+                                HAL.embed(upload, 'measurement', m);
+                            });
+
+                            cb();
+                        });
+                };
+
+                async.each(uploads, handleUpload, function(err){
+                    if (err)
+                        res.send(400, err);
+                    res.send(node);
+                });
             });
         });
     });
