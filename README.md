@@ -1,6 +1,8 @@
 dustmap-server
 =
 
+[![Build Status](https://travis-ci.org/dustmap/dustmap-server.png)](https://travis-ci.org/dustmap/dustmap-server)
+
 Install / Run
 -
     git clone git://github.com/dustmap/dustmap-server
