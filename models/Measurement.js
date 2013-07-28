@@ -1,3 +1,5 @@
+"use strict";
+
 var hooks = require('./hooks.js');
 
 module.exports = function(db, cb){

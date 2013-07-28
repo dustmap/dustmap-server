@@ -1,3 +1,5 @@
+"use strict";
+
 function lonlat(field) {
     return function(val) {
         if (val !== undefined) {
@@ -8,7 +10,7 @@ function lonlat(field) {
 }
 
 module.exports = function(db, cb){
-    var Node = db.define('Node', {
+    db.define('Node', {
         name     : { type: 'text',  required: true  }
       , owner    : { type: 'text',  required: true  }
       , location : { type: 'point', required: false }

@@ -1,9 +1,11 @@
+"use strict";
+
 var hstore = require('pg-hstore');
 
 function hstore2json(field) {
     return function() {
         if (typeof this[field] === 'string')
-            this[field]= hstore.parse(this[field]);
+            this[field] = hstore.parse(this[field]);
     };
 }
 

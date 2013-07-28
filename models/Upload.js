@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function(db, cb){
     var Upload = db.define('Upload', {
         ts : { type: 'date', required: true }

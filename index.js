@@ -1,16 +1,16 @@
+"use strict";
+
 var app = require('./lib/express')
   , http = require('http')
   , https = require('https')
   , fs = require('fs')
-  , http_port = process.env.PORT_HTTP || process.env.PORT || 8080
-  , https_port = process.env.PORT_HTTPS || 4430
 ;
 
-function listening() {
+var listening = function listening() {
     var addr = this.address();
     var type = this.hasOwnProperty('key') ? 'https' : 'http';
     console.log('* listening on %s://%s:%d', type, addr.address, addr.port);
-}
+};
 
 function startHttp() {
     var port = process.env.npm_package_config_http_port;

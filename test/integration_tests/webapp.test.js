@@ -1,6 +1,7 @@
+"use strict";
+
 var app = require('../../lib/express.js')
   , request = require('supertest')(app)
-  , async = require('async')
 ;
 
 

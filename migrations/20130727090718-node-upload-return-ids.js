@@ -1,3 +1,5 @@
+"use strict";
+
 var here = require('here').here;
 
 exports.up = function(db, cb) {

@@ -1,3 +1,4 @@
+"use strict";
 
 exports.up = function(db, callback) {
     /* if location == null, it's an anon. node we have no info about yet */

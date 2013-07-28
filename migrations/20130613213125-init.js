@@ -1,4 +1,5 @@
-var dbm = require('db-migrate');
+"use strict";
+
 var here = require('here').here;
 var async = require('async');
 

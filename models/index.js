@@ -1,3 +1,5 @@
+"use strict";
+
 var orm = require('orm')
   , transaction = require("orm-transaction")
   , async = require('async')

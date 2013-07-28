@@ -1,7 +1,9 @@
+"use strict";
+
 var hooks = require('./hooks.js');
 
 module.exports = function(db, cb){
-    var NodeUpload = db.define('NodeUpload', {
+    db.define('NodeUpload', {
         node_name : { type: 'text', required: true }
       , ts : { type: 'date', required: true }
       , data : { type: 'binary', required: true }

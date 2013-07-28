@@ -1,3 +1,5 @@
 {
-    "laxcomma" : "true"
+    "laxcomma" : true
+  , "node" : true
+  , "curly" : false
 }

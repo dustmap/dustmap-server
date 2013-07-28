@@ -1,6 +1,7 @@
+"use strict";
+
 var Payload = require('dustmap-payload')
   , async = require('async')
-  , util = require('util')
   , HAL = require('../lib/hal.js')
 ;
 
@@ -42,7 +43,7 @@ module.exports = function(app) {
                 }
 
                 async.each(models_to_save, function(obj, cb){
-                    return obj.save(function(err, data){
+                    return obj.save(function(err){
                         return cb( err ? err : null );
                     });
                 }, function(err){
@@ -196,7 +197,8 @@ module.exports = function(app) {
                 async.each(uploads, handleUpload, function(err){
                     if (err)
                         res.send(400, err);
-                    res.send(node);
+
+                   res.send(node);
                 });
             });
         });
