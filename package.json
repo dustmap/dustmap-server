@@ -5,16 +5,16 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_PG_FORCE_NATIVE=1 node .",
-    "test": "./test/run.sh",
+    "test": "./test/test-runner",
     "pretest": "find . -path ./node_modules -prune -o -name \\*js -print0 | xargs -0 node_modules/.bin/jshint"
   },
-  "config" : {
-    "http_port" : 8080 ,
-    "https_port" : 4430 ,
-    "https_cert" : "./certs/server.crt" ,
-    "https_key" : "./certs/server.key"
-  } ,
-  "repository": "",
+  "config": {
+    "http_port": 8080,
+    "https_port": 4430,
+    "https_cert": "./certs/server.crt",
+    "https_key": "./certs/server.key"
+  },
+  "repository": "git://github.com/dustmap/dustmap-server",
   "keywords": [
     "dustmap",
     "server",
@@ -38,6 +38,7 @@
     "supertest": "~0.7.0",
     "nodeunit": "~0.8.0",
     "supervisor": "~0.5.3",
-    "jshint": "*"
+    "jshint": "*",
+    "test-runner": "git://github.com/hoegaarden/test-runner"
   }
 }
