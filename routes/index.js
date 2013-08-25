@@ -102,55 +102,50 @@ module.exports = function(app) {
             .limit(req.page.limit)
         ;
 
+        if (req.query.bbox) {
+            // bbox = left;bottom;right;top
+            var bbox = req.query.bbox.split(';');
+            var box = [
+                bbox[1] , bbox[0] , bbox[3] , bbox[2]
+            ].join(',');
+
+            query.where('box ? @> location', [box]);
+        }
+
         query.run(function(err, nodes){
             if (err)
                 return res.send(400, err);
 
-            async.map(nodes, function iterator(node, cb){
-                var q_upload = req.models.Upload
-                    .find( { node : node.id } )
-                    .order('ts', 'Z')
-                    .limit(1)
-                    .only('id', 'ts')
-                ;
-
+            async.map(nodes, function(node, cb){
                 HAL.link(node, 'self', '/nodes/'.concat(node.id));
 
-                // TODO: make this simpler with extra view / function in postgres
-                return q_upload.run(function(err, uploads){
+                req.models.Upload.find({'node':node.id}).order('ts', 'Z').limit(1).run(function(err, uploads){
                     if (err)
-                        return res.send(err);
-
-                    if (uploads.length) {
-                        var upload = uploads[0]
-                          , ts = upload.ts
-                        ;
-
-                        var q_measurement = req.models.Measurement
-                            .find( { upload : upload.id } )
-                            .only('data', 'id')
-                        ;
-                        return q_measurement.run(function(err, measurements){
-                            if (err)
-                                return cb(err);
-
-                            var last_upload = {};
-                            last_upload.ts = ts;
-                            last_upload.measurements = measurements.map(function(measurement){
-                                return measurement.data;
-                            });
-
-                            HAL.link(last_upload, 'self', '/uploads/'.concat(upload.id));
-
-                            HAL.embed(node, 'last_upload', last_upload);
-
-                            return cb(null, node);
-                        });
-                    } else {
+                        return cb(err);
+                    if (uploads.length <= 0)
                         return cb(null, node);
-                    }
+
+                    var upload = uploads[0];
+
+                    req.models.Measurement.find({'upload':upload.id}).only('data', 'id').run(function(err, measurements){
+                        if (err)
+                            return cb(err);
+
+                        var last_upload = {
+                            ts : upload.ts,
+                            measurements : measurements.map(function(m){
+                                return m.data;
+                            })
+                        };
+
+                        HAL.link(last_upload, 'self', '/uploads/'.concat(upload.id));
+
+                        node.last_upload = last_upload;
+
+                        return cb(null, node);
+                    });
                 });
-            }, function done(err, doc){
+            }, function(err, doc){
                 if (err)
                     return res.send(400, err);
                 return res.send(doc);

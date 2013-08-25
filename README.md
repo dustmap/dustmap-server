@@ -15,7 +15,7 @@ Install / Run
 
 What is this?
 -
-This is the server component for the dustmap.org project. The project's goal is to
+This is the api server component for the dustmap.org project. The project's goal is to
 
  - develop and deploy el-cheapo hardware (raspberrypi, arduino, ...) to measure environmental data (especially particulate matter)
  - develop software for measuring, transfering, storing and visualizing the recorded data
@@ -30,7 +30,7 @@ Hints
  - You can setup multiple different database connections for different `NODE_ENV`, check out the `database.json.example`
  - We currently use `hstore`. Perhaps this will change in future (we'll perhaps use `JSON` as a datatype as soon as soon as 9.3 is out ... or not)
  - No Auth/Sign/.../Whatsoever ... coming in future
- - If you need SSL to connect to the database you need to set the environment variable `NODE_PG_FORCE_NATIVE` (this is the defaul for `npm run` and `npm start`)
+ - If you need SSL to connect to the database you need to set the environment variable `NODE_PG_FORCE_NATIVE` (this is the defaul for `npm test` and `npm start`)
  - you can change the port(s) the server is listening on with `npm config set dustmap-server:http_port 1234`. Available config options:
    - `http_port`
    - `https_port`
