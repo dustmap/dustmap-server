@@ -23,7 +23,7 @@
   "author": "Hannes Hörl <hannes.hoerl@snowreporter.com>",
   "license": "BSD",
   "dependencies": {
-    "express": "~3.2.6",
+    "express": "3.12.1",
     "here": "0.0.2",
     "orm": "git://github.com/dresende/node-orm2#master",
     "pg": "~2.0.0",
